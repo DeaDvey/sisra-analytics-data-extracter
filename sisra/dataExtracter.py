@@ -9,6 +9,7 @@ from selenium.common.exceptions import NoSuchElementException
 import time
 import xlsxwriter
 import pathlib
+from selenium.common.exceptions import NoSuchElementException
 
 
 username = input("Enter username: ")
@@ -118,16 +119,26 @@ def change_filters(filter, row_number, year, amount_of_classes, table_start):
 def login():
     #load login page
     driver.get('https://www.sisraanalytics.co.uk/Account/Login');
+    try:
+        user_name_box = driver.find_element(By.CSS_SELECTOR, "#LogIn_UserName")
+        password_box = driver.find_element(By.CSS_SELECTOR, "#LogIn_Password")
 
-    user_name_box = driver.find_element(By.CSS_SELECTOR, "#LogIn_UserName")
-    password_box = driver.find_element(By.CSS_SELECTOR, "#LogIn_Password")
+    except NoSuchElementException:
+        print(f"Error: Login inputs not available or HTML data changed")
+        exit(1)
 
-    #type username and password then press submit
-    user_name_box.send_keys(username)
-    password_box.send_keys(password)
-    print("submitted login data")
-    password_box.submit()
-    time.sleep(4)
+    try:
+        #type username and password then press submit
+        user_name_box.send_keys(username)
+        password_box.send_keys(password)
+        print("submitted login data")
+        password_box.submit()
+        time.sleep(4)
+
+    except NoSuchElementException:
+        print(f"Error: Login details incorrect or some other error")
+        exit(2)
+
     
     try:
         print("clicking logout of other sessions button")
@@ -189,39 +200,82 @@ def search_pages(year, table_start):
         def cycle_through_filters():
 
             #no filter
-            change_filters("none", 1, year, amount_of_classes, table_start)
-
+            try:
+                change_filters("none", 1, year, amount_of_classes, table_start)
+            
+            except NoSuchElementException:
+                print(f"Error: Could not find year {year} data: no filter")
                 
             #disadvantaged
-            change_filters("disadvantaged", 2, year, amount_of_classes, table_start)
+            try:
+                change_filters("disadvantaged", 2, year, amount_of_classes, table_start)
+
+            except NoSuchElementException:
+                print(f"Error: Could not find year {year} data: dis filter")
+
 
             
             #non disadvantaged
-            change_filters("non-disadvantaged", 3, year, amount_of_classes, table_start)
+            try:
+                change_filters("non-disadvantaged", 3, year, amount_of_classes, table_start)
+
+            except NoSuchElementException:
+                print(f"Error: Could not find year {year} data non dis filter")
+
             
 
             #Hpa upper/higher
-            change_filters("hpa", 4, year, amount_of_classes, table_start)
+            try:
+                change_filters("hpa", 4, year, amount_of_classes, table_start)
+
+            except NoSuchElementException:
+                print(f"Error: Could not find year {year} data upper/higher filter")
+
 
             
             #hpa and dis
-            change_filters("hpa/dis", 5, year, amount_of_classes, table_start)
+            try:
+                change_filters("hpa/dis", 5, year, amount_of_classes, table_start)
+
+            except NoSuchElementException:
+                print(f"Error: Could not find year {year} data hpa and dis filter")
+
 
 
             #SEN e and k
-            change_filters("SEN", 6, year, amount_of_classes, table_start)
+            try:
+                change_filters("SEN", 6, year, amount_of_classes, table_start)
+
+            except NoSuchElementException:
+                print(f"Error: Could not find year {year} data SEN filter")
+
 
 
             #non SEN
-            change_filters("non-SEN", 7, year, amount_of_classes, table_start)
+            try:
+                change_filters("non-SEN", 7, year, amount_of_classes, table_start)
+
+            except NoSuchElementException:
+                print(f"Error: Could not find year {year} data non SEN filter")
+
 
 
             #WBRI ethnic code
-            change_filters("WBRI", 8, year, amount_of_classes, table_start)
+            try:
+                change_filters("WBRI", 8, year, amount_of_classes, table_start)
+
+            except NoSuchElementException:
+                print(f"Error: Could not find year {year} data WBRI filter")
+
 
 
             #AKPN ethnic code
-            change_filters("AKPN", 9, year, amount_of_classes, table_start)
+            try:
+                change_filters("AKPN", 9, year, amount_of_classes, table_start)
+
+            except NoSuchElementException:
+                print(f"Error: Could not find year {year} data AKPN filter")
+
 
         cycle_through_filters()
         amount_of_classes-=1
@@ -310,10 +364,9 @@ if year_7_url.lower() != "n/a" and year_7_url.lower() != "n" :
 workbook.close()
 print("workbook closed")
 
-time.sleep(99999999)
 
 driver.quit()
 
-
+exit(3)
 
 

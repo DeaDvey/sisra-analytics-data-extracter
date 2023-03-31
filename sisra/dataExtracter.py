@@ -15,6 +15,9 @@ from selenium.common.exceptions import NoSuchElementException
 username = input("Enter username: ")
 password = input("Enter password: ")
 
+subjectValue = int(input("What subjectValue are you finding results for? (combined=440, physics=471. chemistry=470, biology=469) "))
+total_amount_of_classes = input("How many classes are there? ")
+
 
 print("")
 print("---What data do you need(y/n)---")
@@ -104,7 +107,7 @@ def change_filters(filter, row_number, year, amount_of_classes, table_start):
     submit_filters_button.click()
     
     try:
-        total_score_box = driver.find_element(By.CSS_SELECTOR, "tfoot tr td:nth-of-type(13)")
+        total_score_box = driver.find_element(By.CSS_SELECTOR, "tfoot tr td:nth-of-type(11)")
         print(f"{year}_{amount_of_classes} {filter}: {total_score_box.text}")
         worksheet.write(row_number + table_start, amount_of_classes + 1, f"{total_score_box.text}") 
 
@@ -155,9 +158,10 @@ login()
 
 
 def search_pages(year, table_start):
+    global total_amount_of_classes
     #global year
     #driver.get(url);
-    amount_of_classes = 5;
+    amount_of_classes = int(total_amount_of_classes);
 
 
     worksheet.write(table_start, 0, f'Year {year}')
@@ -287,61 +291,179 @@ def search_pages(year, table_start):
     
 
 
-
 driver.get("https://www.sisraanalytics.co.uk/ReportsHome")
+print("On reports page")
 
 if year_11_data.lower() == "y":
-    year_11_link = driver.find_element(By.CSS_SELECTOR, ".year:nth-of-type(3):not(.lvrDDL .year)")
-    year_11_link.click()
-    latest_assesment = driver.find_element(By.CSS_SELECTOR, ".pubGrp_11 .eapPub:nth-of-type(1)  .fakea:nth-of-type(1)")
-    latest_assesment.click()
-    go_button = driver.find_element(By.CSS_SELECTOR, ".toClass6599 .button")
-    go_button.click()
-    search_pages(11, 0)
+	try:
+		year_11_link = driver.find_element(By.CSS_SELECTOR, ".year:nth-of-type(3):not(.lvrDDL .year)")
+		year_11_link.click()
+		print("On year 11 section")
+		latest_assesment = driver.find_element(By.CSS_SELECTOR, ".pubGrp_11 .eapPub:nth-of-type(1)  .fakea:nth-of-type(1)")
+		latest_assesment.click()
+		print("On most recent assessment")
+		#new
+		take_me_to_qualtification_class = driver.find_element(By.CSS_SELECTOR, ".active .toClass")
+		take_me_to_qualtification_class.click()
+		print("Clicked 'take me to qualification/class'")
+		qualification_id = driver.find_element(By.CSS_SELECTOR, ".active #Qual_ID")
+		qualification_id.click()
+		print("Clicked subjects drop down menu")
+		subject_button = driver.find_element(By.CSS_SELECTOR, f'.active [value="{subjectValue}"]') 
+		subject_button.click()
+		print("Clicked on your subjec")
+
+		time.sleep(1)
+		go_button = driver.find_element(By.CSS_SELECTOR, ".active .EAPRptBtn .button")
+		driver.execute_script("arguments[0].scrollIntoView();", go_button)
+		go_button.click()
+		print("Clicked go button 1")
+		time.sleep(1)
+		#go_button.click()
+		#print("Clicked go button 2")
+		search_pages(11, 0)
+
+	except NoSuchElementException:
+		print("Error when looking for year 11")
 
 driver.get("https://www.sisraanalytics.co.uk/ReportsHome")
 
 if year_10_data.lower() == "y":
-    year_10_link = driver.find_element(By.CSS_SELECTOR, ".year:nth-of-type(4):not(.lvrDDL .year")
-    year_10_link.click()
-    latest_assesment = driver.find_element(By.CSS_SELECTOR, ".pubGrp_10 .eapPub:nth-of-type(1)  .fakea:nth-of-type(1)")
-    latest_assesment.click()
-    go_button = driver.find_element(By.CSS_SELECTOR, ".toClass65101 .button")
-    go_button.click()
-    search_pages(10, 11)
+	try:
+		year_10_link = driver.find_element(By.CSS_SELECTOR, ".year:nth-of-type(4):not(.lvrDDL .year)")
+		year_10_link.click()
+		print("On year 10 section")
+		latest_assesment = driver.find_element(By.CSS_SELECTOR, ".pubGrp_10 .eapPub:nth-of-type(1)  .fakea:nth-of-type(1)")
+		latest_assesment.click()
+		print("On most recent assessment")
+		#new
+		take_me_to_qualtification_class = driver.find_element(By.CSS_SELECTOR, ".active .toClass")
+		take_me_to_qualtification_class.click()
+		print("Clicked 'take me to qualification/class'")
+		qualification_id = driver.find_element(By.CSS_SELECTOR, ".active #Qual_ID")
+		qualification_id.click()
+		print("Clicked subjects drop down menu")
+		subject_button = driver.find_element(By.CSS_SELECTOR, f'.active [value="{subjectValue}"]') 
+		subject_button.click()
+		print("Clicked on your subjec")
+
+		time.sleep(1)
+		go_button = driver.find_element(By.CSS_SELECTOR, ".active .EAPRptBtn .button")
+		driver.execute_script("arguments[0].scrollIntoView();", go_button)
+		go_button.click()
+		print("Clicked go button 1")
+		time.sleep(1)
+		#go_button.click()
+		#print("Clicked go button 2")
+		search_pages(10, 11)
+
+	except NoSuchElementException:
+		print("Error when looking for year 10")
 
 driver.get("https://www.sisraanalytics.co.uk/ReportsHome")
 
 if year_9_data.lower() == "y":
-    year_9_link = driver.find_element(By.CSS_SELECTOR, ".year:nth-of-type(5):not(.lvrDDL .year")
-    year_9_link.click()
-    latest_assesment = driver.find_element(By.CSS_SELECTOR, ".pubGrp_9 .eapPub:nth-of-type(1)  .fakea:nth-of-type(1)")
-    latest_assesment.click()
-    go_button = driver.find_element(By.CSS_SELECTOR, ".toClass65102 .button")
-    go_button.click()
-    search_pages(9, 22)
+	try:
+		year_10_link = driver.find_element(By.CSS_SELECTOR, ".year:nth-of-type(5):not(.lvrDDL .year)")
+		year_10_link.click()
+		print("On year 9 section")
+		latest_assesment = driver.find_element(By.CSS_SELECTOR, ".pubGrp_9 .eapPub:nth-of-type(1)  .fakea:nth-of-type(1)")
+		latest_assesment.click()
+		print("On most recent assessment")
+		#new
+		take_me_to_qualtification_class = driver.find_element(By.CSS_SELECTOR, ".active .toClass")
+		take_me_to_qualtification_class.click()
+		print("Clicked 'take me to qualification/class'")
+		qualification_id = driver.find_element(By.CSS_SELECTOR, ".active #Qual_ID")
+		qualification_id.click()
+		print("Clicked subjects drop down menu")
+		subject_button = driver.find_element(By.CSS_SELECTOR, f'.active [value="{subjectValue}"]') 
+		subject_button.click()
+		print("Clicked on your subjec")
 
+		time.sleep(1)
+		go_button = driver.find_element(By.CSS_SELECTOR, ".active .EAPRptBtn .button")
+		driver.execute_script("arguments[0].scrollIntoView();", go_button)
+		go_button.click()
+		print("Clicked go button 1")
+		time.sleep(1)
+		#go_button.click()
+		#print("Clicked go button 2")
+		search_pages(9, 22)
+
+	except NoSuchElementException:
+		print("Error when looking for year 9")
+
+    
 driver.get("https://www.sisraanalytics.co.uk/ReportsHome")
 
 if year_8_data.lower() == "y":
-    year_8_link = driver.find_element(By.CSS_SELECTOR, ".year:nth-of-type(6):not(.lvrDDL .year")
-    year_8_link.click()
-    latest_assesment = driver.find_element(By.CSS_SELECTOR, ".pubGrp_8 .eapPub:nth-of-type(1)  .fakea:nth-of-type(1)")
-    latest_assesment.click()
-    go_button = driver.find_element(By.CSS_SELECTOR, ".toClass65103 .button")
-    go_button.click()
-    search_pages(8, 33)
+	try:
+		year_10_link = driver.find_element(By.CSS_SELECTOR, ".year:nth-of-type(6):not(.lvrDDL .year)")
+		year_10_link.click()
+		print("On year 8 section")
+		latest_assesment = driver.find_element(By.CSS_SELECTOR, ".pubGrp_8 .eapPub:nth-of-type(1)  .fakea:nth-of-type(1)")
+		latest_assesment.click()
+		print("On most recent assessment")
+		#new
+		take_me_to_qualtification_class = driver.find_element(By.CSS_SELECTOR, ".active .toClass")
+		take_me_to_qualtification_class.click()
+		print("Clicked 'take me to qualification/class'")
+		qualification_id = driver.find_element(By.CSS_SELECTOR, ".active #Qual_ID")
+		qualification_id.click()
+		print("Clicked subjects drop down menu")
+		subject_button = driver.find_element(By.CSS_SELECTOR, f'.active [value="{subjectValue}"]') 
+		subject_button.click()
+		print("Clicked on your subjec")
+
+		time.sleep(1)
+		go_button = driver.find_element(By.CSS_SELECTOR, ".active .EAPRptBtn .button")
+		driver.execute_script("arguments[0].scrollIntoView();", go_button)
+		go_button.click()
+		print("Clicked go button 1")
+		time.sleep(1)
+		#go_button.click()
+		#print("Clicked go button 2")
+		search_pages(8, 33)
+
+	except NoSuchElementException:
+		print("Error when looking for year 8")
+
+
 
 driver.get("https://www.sisraanalytics.co.uk/ReportsHome")
     
 if year_7_data.lower() == "y":
-    year_7_link = driver.find_element(By.CSS_SELECTOR, ".year:nth-of-type(7):not(.lvrDDL .year")
-    year_7_link.click()
-    latest_assesment = driver.find_element(By.CSS_SELECTOR, ".pubGrp_7 .eapPub:nth-of-type(1)  .fakea:nth-of-type(1)")
-    latest_assesment.click()
-    go_button = driver.find_element(By.CSS_SELECTOR, ".toClass65104 .button")
-    go_button.click()
-    search_pages(7, 44)
+	try:
+		year_10_link = driver.find_element(By.CSS_SELECTOR, ".year:nth-of-type(7):not(.lvrDDL .year)")
+		year_10_link.click()
+		print("On year 7 section")
+		latest_assesment = driver.find_element(By.CSS_SELECTOR, ".pubGrp_7 .eapPub:nth-of-type(1)  .fakea:nth-of-type(1)")
+		latest_assesment.click()
+		print("On most recent assessment")
+		#new
+		take_me_to_qualtification_class = driver.find_element(By.CSS_SELECTOR, ".active .toClass")
+		take_me_to_qualtification_class.click()
+		print("Clicked 'take me to qualification/class'")
+		qualification_id = driver.find_element(By.CSS_SELECTOR, ".active #Qual_ID")
+		qualification_id.click()
+		print("Clicked subjects drop down menu")
+		subject_button = driver.find_element(By.CSS_SELECTOR, f'.active [value="{subjectValue}"]') 
+		subject_button.click()
+		print("Clicked on your subjec")
+
+		time.sleep(1)
+		go_button = driver.find_element(By.CSS_SELECTOR, ".active .EAPRptBtn .button")
+		driver.execute_script("arguments[0].scrollIntoView();", go_button)
+		go_button.click()
+		print("Clicked go button 1")
+		time.sleep(1)
+		#go_button.click()
+		#print("Clicked go button 2")
+		search_pages(7, 44)
+
+	except NoSuchElementException:
+		print("Error when looking for year 7")
 
 
 '''

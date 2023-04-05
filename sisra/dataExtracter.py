@@ -40,7 +40,7 @@ worksheet.set_column(0, 0, 30)
 
 
 def change_filters(filter, row_number, year, amount_of_classes, table_start):
-    global filters_button, filter_menu_button, uncheck_all_button, submit_filters_button
+    global filters_button, filter_menu_button, uncheck_all_button, submit_filters_button, counter_for_percentage, amount_of_tasks
     
     filters_button = driver.find_element(By.CSS_SELECTOR, ".filterbuttonholder .tabbutton:nth-of-type(3)")
     filters_button.click()
@@ -108,12 +108,14 @@ def change_filters(filter, row_number, year, amount_of_classes, table_start):
     
     try:
         total_score_box = driver.find_element(By.CSS_SELECTOR, "tfoot tr td:nth-of-type(11)")
-        print(f"{year}_{amount_of_classes} {filter}: {total_score_box.text}")
+        print(f"[{(counter_for_percentage / amount_of_tasks) * 100}]{year}_{amount_of_classes} {filter}: {total_score_box.text}")
         worksheet.write(row_number + table_start, amount_of_classes + 1, f"{total_score_box.text}") 
+        counter_for_percentage+=1
 
     except NoSuchElementException:
-        print(f"{year}_{amount_of_classes} {filter}: N/A")
+        print(f"[{(counter_for_percentage / amount_of_tasks) * 100}]{year}_{amount_of_classes} {filter}: N/A")
         worksheet.write(row_number + table_start, amount_of_classes + 1, f"N/A") 
+        counter_for_percentage+=1
 
 
 
@@ -288,7 +290,30 @@ def search_pages(year, table_start):
     #print(total_score_box.text)
 
 
-    
+amount_of_tasks = 0
+
+if year_11_data.lower == "y":
+	amount_of_tasks+=1    
+
+if year_10_data.lower == "y":
+	amount_of_tasks+=1    
+
+if year_9_data.lower == "y":
+	amount_of_tasks+=1    
+
+if year_8_data.lower == "y":
+	amount_of_tasks+=1    
+
+if year_7_data.lower == "y":
+	amount_of_tasks+=1    
+
+print(amount_of_tasks)
+amount_of_tasks*=total_amount_of_classes # multiply by the amount of classes there are
+amount_of_tasks*=9 # multiply by the amount of tasks per class
+
+counter_for_percentage = 1
+
+
 
 
 driver.get("https://www.sisraanalytics.co.uk/ReportsHome")

@@ -108,12 +108,12 @@ def change_filters(filter, row_number, year, amount_of_classes, table_start):
     
     try:
         total_score_box = driver.find_element(By.CSS_SELECTOR, "tfoot tr td:nth-of-type(11)")
-        print(f"[{(counter_for_percentage / amount_of_tasks) * 100}]{year}_{amount_of_classes} {filter}: {total_score_box.text}")
+        print(f"{year}_{amount_of_classes} {filter}: {total_score_box.text}")
         worksheet.write(row_number + table_start, amount_of_classes + 1, f"{total_score_box.text}") 
         counter_for_percentage+=1
 
     except NoSuchElementException:
-        print(f"[{(counter_for_percentage / amount_of_tasks) * 100}]{year}_{amount_of_classes} {filter}: N/A")
+        print(f"{year}_{amount_of_classes} {filter}: N/A")
         worksheet.write(row_number + table_start, amount_of_classes + 1, f"N/A") 
         counter_for_percentage+=1
 

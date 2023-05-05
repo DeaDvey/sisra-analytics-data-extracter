@@ -10,12 +10,16 @@ import time
 import xlsxwriter
 import pathlib
 from selenium.common.exceptions import NoSuchElementException
+import datetime
 
+date = datetime.datetime.now()
+print(date)
 
 username = input("Enter username: ")
 password = input("Enter password: ")
 
-subjectValue = int(input("What subjectValue are you finding results for? (combined=440, physics=471. chemistry=470, biology=469) "))
+
+#subjectValue = int(input("What subjectValue are you finding results for? (combined=385, physics=471. chemistry=470, biology=469) "))
 total_amount_of_classes = input("How many classes are there? ")
 
 
@@ -27,19 +31,21 @@ year_9_data = input("Year 9 data? ")
 year_8_data = input("Year 8 data? ")
 year_7_data = input("Year 7 data? ")
 
+fileName = input("Name the file: ")
+
 opts = ChromeOptions()
 opts.add_argument("--window-size=1500,1500")
-opts.add_argument("--headless")
+#opts.add_argument("--headless")
 driver_path = (pathlib.Path(__file__).parent / 'chromedriver').resolve()
 driver = webdriver.Chrome(str(driver_path), options=opts)
 driver.implicitly_wait(5) # Just in case
 # Create a workbook and add a worksheet.
-workbook = xlsxwriter.Workbook('data.xlsx')
+workbook = xlsxwriter.Workbook(f'{fileName}{date}.xlsx')
 worksheet = workbook.add_worksheet()
 worksheet.set_column(0, 0, 30)
 
 
-def change_filters(filter, row_number, year, amount_of_classes, table_start):
+def change_filters(filter, row_number, year, amount_of_classes, table_start, class_name):
     global filters_button, filter_menu_button, uncheck_all_button, submit_filters_button, counter_for_percentage, amount_of_tasks
     
     filters_button = driver.find_element(By.CSS_SELECTOR, ".filterbuttonholder .tabbutton:nth-of-type(3)")
@@ -108,7 +114,7 @@ def change_filters(filter, row_number, year, amount_of_classes, table_start):
     
     try:
         total_score_box = driver.find_element(By.CSS_SELECTOR, "tfoot tr td:nth-of-type(11)")
-        print(f"{year}_{amount_of_classes} {filter}: {total_score_box.text}")
+        print(f"{class_name} {filter}: {total_score_box.text}")
         worksheet.write(row_number + table_start, amount_of_classes + 1, f"{total_score_box.text}") 
         counter_for_percentage+=1
 
@@ -167,12 +173,6 @@ def search_pages(year, table_start):
 
 
     worksheet.write(table_start, 0, f'Year {year}')
-    worksheet.write(table_start, 1, f'Year {year} overall')
-    worksheet.write(table_start, 2, f'{year}-1')
-    worksheet.write(table_start, 3, f'{year}-2')
-    worksheet.write(table_start, 4, f'{year}-3')
-    worksheet.write(table_start, 5, f'{year}-4')
-    worksheet.write(table_start, 6, f'{year}-5')
     
     worksheet.write(table_start + 1, 0, "Progress VA")
     worksheet.write(table_start + 2, 0, "Dis")
@@ -195,26 +195,37 @@ def search_pages(year, table_start):
     #options_button.click()
     
     while amount_of_classes >= 0:
-        class_changing_box = driver.find_element(By.CSS_SELECTOR, f"#ReportOptions_TchGrp_ID option:nth-of-type({amount_of_classes+1})")
-        options_button = driver.find_element(By.CSS_SELECTOR, ".filterbuttonholder .tabbutton:nth-of-type(2)")
-        options_button.click()
+        options_tab = driver.find_element(By.CSS_SELECTOR, "[data-tab='option']")
+        options_tab.click()
+        faculty_selection = driver.find_element(By.CSS_SELECTOR, "[name='ReportOptions.Faculty_ID'] [value='2']")
+        faculty_selection.click()
         time.sleep(3)
+        qualification_selection = driver.find_element(By.XPATH, f'.//*[contains(text(), "Science")]/ancestor::*[contains(@id, "ReportOptions_Qual_ID")]//*[contains(text(), "Science")]')
+        qualification_selection.click()
+        class_selection = driver.find_element(By.CSS_SELECTOR, f".active [name='TchGrp_ID'] option:nth-of-type({amount_of_classes})")
+        class_name = class_selection.text
+        print(f"---{class_name}---")
+        class_selection.click()
+        time.sleep(0.5)
+        
+        worksheet.write(table_start, amount_of_classes, f'class: {class_name}')
         class_changing_box.click()
         time.sleep(5)
+        
 
         
         def cycle_through_filters():
 
             #no filter
             try:
-                change_filters("none", 1, year, amount_of_classes, table_start)
+                change_filters("none", 1, year, amount_of_classes, table_start, class_name)
             
             except NoSuchElementException:
                 print(f"Error: Could not find year {year} data: no filter")
                 
             #disadvantaged
             try:
-                change_filters("disadvantaged", 2, year, amount_of_classes, table_start)
+                change_filters("disadvantaged", 2, year, amount_of_classes, table_start, class_name)
 
             except NoSuchElementException:
                 print(f"Error: Could not find year {year} data: dis filter")
@@ -223,7 +234,7 @@ def search_pages(year, table_start):
             
             #non disadvantaged
             try:
-                change_filters("non-disadvantaged", 3, year, amount_of_classes, table_start)
+                change_filters("non-disadvantaged", 3, year, amount_of_classes, table_start, class_name)
 
             except NoSuchElementException:
                 print(f"Error: Could not find year {year} data non dis filter")
@@ -232,7 +243,7 @@ def search_pages(year, table_start):
 
             #Hpa upper/higher
             try:
-                change_filters("hpa", 4, year, amount_of_classes, table_start)
+                change_filters("hpa", 4, year, amount_of_classes, table_start, class_name)
 
             except NoSuchElementException:
                 print(f"Error: Could not find year {year} data upper/higher filter")
@@ -241,7 +252,7 @@ def search_pages(year, table_start):
             
             #hpa and dis
             try:
-                change_filters("hpa/dis", 5, year, amount_of_classes, table_start)
+                change_filters("hpa/dis", 5, year, amount_of_classes, table_start, class_name)
 
             except NoSuchElementException:
                 print(f"Error: Could not find year {year} data hpa and dis filter")
@@ -250,7 +261,7 @@ def search_pages(year, table_start):
 
             #SEN e and k
             try:
-                change_filters("SEN", 6, year, amount_of_classes, table_start)
+                change_filters("SEN", 6, year, amount_of_classes, table_start, class_name)
 
             except NoSuchElementException:
                 print(f"Error: Could not find year {year} data SEN filter")
@@ -259,7 +270,7 @@ def search_pages(year, table_start):
 
             #non SEN
             try:
-                change_filters("non-SEN", 7, year, amount_of_classes, table_start)
+                change_filters("non-SEN", 7, year, amount_of_classes, table_start, class_name)
 
             except NoSuchElementException:
                 print(f"Error: Could not find year {year} data non SEN filter")
@@ -268,7 +279,7 @@ def search_pages(year, table_start):
 
             #WBRI ethnic code
             try:
-                change_filters("WBRI", 8, year, amount_of_classes, table_start)
+                change_filters("WBRI", 8, year, amount_of_classes, table_start, class_name)
 
             except NoSuchElementException:
                 print(f"Error: Could not find year {year} data WBRI filter")
@@ -277,7 +288,7 @@ def search_pages(year, table_start):
 
             #AKPN ethnic code
             try:
-                change_filters("AKPN", 9, year, amount_of_classes, table_start)
+                change_filters("AKPN", 9, year, amount_of_classes, table_start, class_name)
 
             except NoSuchElementException:
                 print(f"Error: Could not find year {year} data AKPN filter")
@@ -334,7 +345,7 @@ if year_11_data.lower() == "y":
 		qualification_id = driver.find_element(By.CSS_SELECTOR, ".active #Qual_ID")
 		qualification_id.click()
 		print("Clicked subjects drop down menu")
-		subject_button = driver.find_element(By.CSS_SELECTOR, f'.active [value="{subjectValue}"]') 
+		subject_button = driver.find_element(By.XPATH, f'.//*[contains(text(), "Science Combined")]/ancestor::*[contains(@class, "active")]//*[contains(text(), "Science Combined")]') 
 		subject_button.click()
 		print("Clicked on your subjec")
 
@@ -368,7 +379,7 @@ if year_10_data.lower() == "y":
 		qualification_id = driver.find_element(By.CSS_SELECTOR, ".active #Qual_ID")
 		qualification_id.click()
 		print("Clicked subjects drop down menu")
-		subject_button = driver.find_element(By.CSS_SELECTOR, f'.active [value="{subjectValue}"]') 
+		subject_button = driver.find_element(By.XPATH, f'.//*[contains(text(), "Science Combined")]/ancestor::*[contains(@class, "active")]//*[contains(text(), "Science Combined")]')
 		subject_button.click()
 		print("Clicked on your subjec")
 
@@ -402,7 +413,7 @@ if year_9_data.lower() == "y":
 		qualification_id = driver.find_element(By.CSS_SELECTOR, ".active #Qual_ID")
 		qualification_id.click()
 		print("Clicked subjects drop down menu")
-		subject_button = driver.find_element(By.CSS_SELECTOR, f'.active [value="{subjectValue}"]') 
+		subject_button = driver.find_element(By.XPATH, f'.//*[contains(text(), "Science")]/ancestor::*[contains(@class, "active")]//*[contains(text(), "Science")]')
 		subject_button.click()
 		print("Clicked on your subjec")
 
@@ -437,7 +448,7 @@ if year_8_data.lower() == "y":
 		qualification_id = driver.find_element(By.CSS_SELECTOR, ".active #Qual_ID")
 		qualification_id.click()
 		print("Clicked subjects drop down menu")
-		subject_button = driver.find_element(By.CSS_SELECTOR, f'.active [value="{subjectValue}"]') 
+		subject_button = driver.find_element(By.XPATH, f'.//*[contains(text(), "Science")]/ancestor::*[contains(@class, "active")]//*[contains(text(), "Science")]')
 		subject_button.click()
 		print("Clicked on your subjec")
 
@@ -473,7 +484,7 @@ if year_7_data.lower() == "y":
 		qualification_id = driver.find_element(By.CSS_SELECTOR, ".active #Qual_ID")
 		qualification_id.click()
 		print("Clicked subjects drop down menu")
-		subject_button = driver.find_element(By.CSS_SELECTOR, f'.active [value="{subjectValue}"]') 
+		subject_button = driver.find_element(By.XPATH, f'.//*[contains(text(), "Science")]/ancestor::*[contains(@class, "active")]//*[contains(text(), "Science")]')
 		subject_button.click()
 		print("Clicked on your subjec")
 
